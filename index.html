@@ -38,14 +38,14 @@
       font-weight: bold;
       color: #eee;
       font-size: 18px;
-      box-shadow: 0 0 8px #7f00ff88;
+      box-shadow: 0 0 4px #7f00ff55; /* reduced glow */
       transition: background 0.2s, box-shadow 0.2s;
     }
 
     .locker.open {
       background: #9d00ff;
       color: #000;
-      box-shadow: 0 0 10px #b84dff;
+      box-shadow: 0 0 6px #b84dff; /* reduced glow */
       transform: none;
     }
 
@@ -97,7 +97,7 @@
   <button onclick="startAnimation()" id="startBtn">Start Puzzle</button>
   <div class="status" id="statusText"></div>
   <div class="grid" id="lockerGrid"></div>
-  <div class="footer">Made by Anirudh</div>
+  <div class="footer">Made by Anirudh 8C</div>
 
   <script>
     const grid = document.getElementById("lockerGrid");
@@ -119,13 +119,22 @@
     async function toggleLockers(person) {
       statusText.innerText = `Person ${person} is toggling lockers...`;
 
+      // Gradual acceleration from person 1 to 50
+      let delay;
+      if (person <= 50) {
+        // Start slow (60ms) and linearly reduce to 10ms by person 50
+        delay = 60 - ((person - 1) * (50 / 49)); 
+      } else {
+        delay = 10; // constant after person 50
+      }
+
       for (let i = person - 1; i < 100; i += person) {
         lockers[i].open = !lockers[i].open;
         lockers[i].element.classList.toggle("open", lockers[i].open);
-        await sleep(10); // faster toggle
+        await sleep(delay);
       }
 
-      await sleep(1000); // 1s pause after each person
+      await sleep(1000);
     }
 
     async function startAnimation() {
