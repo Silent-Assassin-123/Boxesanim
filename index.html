@@ -5,8 +5,8 @@
   <title>Locker Puzzle</title>
   <style>
     body {
-      background: black;
-      color: #e0b3ff;
+      background: #ffffff;
+      color: #d10000;
       font-family: 'Orbitron', sans-serif;
       text-align: center;
       padding: 30px;
@@ -15,8 +15,8 @@
     h1 {
       font-size: 3em;
       margin-bottom: 10px;
-      color: #d17fff;
-      text-shadow: 0 0 10px #ff00ff;
+      color: #b00000;
+      text-shadow: 0 0 10px #ff4d4d;
     }
 
     .grid {
@@ -30,47 +30,47 @@
     .locker {
       width: 60px;
       height: 60px;
-      background: #3a0057;
+      background: #ffffff;
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: bold;
-      color: #eee;
+      color: #b00000;
       font-size: 18px;
-      box-shadow: 0 0 4px #7f00ff55; /* reduced glow */
+      box-shadow: 0 0 4px #ff000055;
       transition: background 0.2s, box-shadow 0.2s;
     }
 
     .locker.open {
-      background: #9d00ff;
-      color: #000;
-      box-shadow: 0 0 6px #b84dff; /* reduced glow */
+      background: #ff0000;
+      color: #fff;
+      box-shadow: 0 0 8px #ff4d4d;
       transform: none;
     }
 
     button {
-      margin-top: 20px;
+      margin: 10px;
       padding: 12px 25px;
       font-size: 18px;
       font-family: 'Orbitron', sans-serif;
-      background: linear-gradient(145deg, #9d00ff, #ff00ff);
+      background: linear-gradient(145deg, #ff0000, #ff4d4d);
       border: none;
       border-radius: 10px;
-      color: black;
+      color: white;
       font-weight: bold;
       cursor: pointer;
-      box-shadow: 0 0 15px #ff00ff;
+      box-shadow: 0 0 15px #ff4d4d;
       transition: all 0.3s ease-in-out;
     }
 
     button:hover {
       transform: scale(1.05);
-      box-shadow: 0 0 25px #ff00ff;
+      box-shadow: 0 0 25px #ff6666;
     }
 
     button:disabled {
-      background: #333;
+      background: #ccc;
       color: #888;
       box-shadow: none;
       cursor: not-allowed;
@@ -79,14 +79,15 @@
     .status {
       margin-top: 20px;
       font-size: 1.5em;
-      color: #ff66ff;
-      text-shadow: 0 0 10px #ff00ff;
+      color: #b00000;
+      text-shadow: 0 0 10px #ff6666;
     }
 
     .footer {
-      margin-top: 40px;
-      font-size: 1em;
-      color: #999;
+      margin-top: 60px;
+      font-size: 1.2em;
+      color: #b00000;
+      text-shadow: 0 0 8px #ffcccc;
     }
 
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
@@ -95,6 +96,7 @@
 <body>
   <h1>Locker Puzzle</h1>
   <button onclick="startAnimation()" id="startBtn">Start Puzzle</button>
+  <button onclick="togglePause()" id="pauseBtn" disabled>Pause</button>
   <div class="status" id="statusText"></div>
   <div class="grid" id="lockerGrid"></div>
   <div class="footer">Made by Anirudh 8C</div>
@@ -103,6 +105,8 @@
     const grid = document.getElementById("lockerGrid");
     const statusText = document.getElementById("statusText");
     const lockers = [];
+    let isPaused = false;
+    let animationRunning = false;
 
     for (let i = 1; i <= 100; i++) {
       const div = document.createElement("div");
@@ -116,29 +120,37 @@
       return new Promise(resolve => setTimeout(resolve, ms));
     }
 
+    async function waitWhilePaused() {
+      while (isPaused) {
+        await sleep(100);
+      }
+    }
+
     async function toggleLockers(person) {
       statusText.innerText = `Person ${person} is toggling lockers...`;
 
-      // Gradual acceleration from person 1 to 50
       let delay;
       if (person <= 50) {
-        // Start slow (60ms) and linearly reduce to 10ms by person 50
         delay = 60 - ((person - 1) * (50 / 49)); 
       } else {
-        delay = 10; // constant after person 50
+        delay = 10;
       }
 
       for (let i = person - 1; i < 100; i += person) {
+        await waitWhilePaused();
         lockers[i].open = !lockers[i].open;
         lockers[i].element.classList.toggle("open", lockers[i].open);
         await sleep(delay);
       }
 
-      await sleep(1000);
+      await sleep(500);
     }
 
     async function startAnimation() {
+      if (animationRunning) return;
+      animationRunning = true;
       document.getElementById("startBtn").disabled = true;
+      document.getElementById("pauseBtn").disabled = false;
       statusText.innerText = "Resetting lockers...";
 
       for (let locker of lockers) {
@@ -154,6 +166,15 @@
 
       statusText.innerText = "Only the lockers with perfect square numbers remain open. Puzzle complete.";
       document.getElementById("startBtn").disabled = false;
+      document.getElementById("pauseBtn").disabled = true;
+      animationRunning = false;
+    }
+
+    function togglePause() {
+      const btn = document.getElementById("pauseBtn");
+      isPaused = !isPaused;
+      btn.textContent = isPaused ? "Resume" : "Pause";
+      statusText.innerText = isPaused ? "Animation Paused..." : statusText.innerText;
     }
   </script>
 </body>
